@@ -1,12 +1,28 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text } from 'react-native';
 
-const Cell = ({ value, onPress }) => {
+const Cell = ({ value, onPress, onLongPress }) => {
+  const getCellContent = () => {
+    if (!value.isRevealed && !value.isFlagged) return '';
+    if (value.isFlagged) return '🚩';
+    if (value.isMine) return '💣';
+    return value.neighborCount > 0 ? value.neighborCount : '';
+  };
+
+  const getCellStyle = () => {
+    if (!value.isRevealed) return styles.cell;
+    if (value.isMine) return [styles.cell, styles.mineCell];
+    return [styles.cell, styles.revealedCell];
+  };
+
   return (
     <TouchableOpacity
-      style={styles.cell}
+      style={getCellStyle()}
       onPress={onPress}
-    />
+      onLongPress={onLongPress}
+    >
+      <Text style={styles.cellText}>{getCellContent()}</Text>
+    </TouchableOpacity>
   );
 };
 
@@ -17,6 +33,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     borderWidth: 1,
     borderColor: '#999',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  revealedCell: {
+    backgroundColor: '#eee',
+  },
+  mineCell: {
+    backgroundColor: '#ff9999',
+  },
+  cellText: {
+    fontSize: 16,
   },
 });
 
