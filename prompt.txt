@@ -1,0 +1,57 @@
+DÉMINEUR INFINI - CONTEXTE ET AVANCEMENT
+
+OBJECTIF DU PROJET :
+- Créer un démineur infini sur mobile
+- Grille scrollable dans toutes les directions
+- Système de niveaux basé sur le nombre de cases découvertes
+- Personnalisation (couleurs, thèmes) débloquable avec les niveaux
+- Système de vies bonus
+- Menu avec 3 onglets : Partie en cours, Best scores, Boutique
+
+ÉTAT ACTUEL :
+- Base du démineur fonctionnelle (grille 30x30, mines, drapeaux)
+- Scrolling implémenté mais problématique
+- Optimisations de performance réalisées (memo, useCallback)
+
+FONCTIONNALITÉS IMPLÉMENTÉES :
+✓ Logique de base du démineur
+✓ Placement aléatoire des mines
+✓ Système de drapeaux
+✓ Révélation automatique des cases vides
+✓ Grille scrollable
+✓ Optimisations de performance
+
+BUGS CONNUS :
+1. Le déplacement fonctionne encore avec un doigt malgré les tentatives de restriction à deux doigts
+2. Problème de détection du nombre de doigts sur l'écran
+3. Conflit entre les interactions de jeu et le déplacement
+
+PROCHAINES ÉTAPES :
+1. Corriger le système de déplacement à deux doigts
+2. Implémenter la génération infinie de la grille
+3. Ajouter le système de niveaux
+4. Développer le menu et les onglets
+5. Intégrer la personnalisation
+
+NOTES TECHNIQUES :
+- Utilisation de React Native avec Expo SDK 52
+- PanResponder pour la gestion des interactions tactiles
+- ScrollView pour le défilement
+- Structure du projet :
+  - src/
+    - components/
+      - Grid.js (composant principal)
+      - Cell.js (composant de case)
+    - utils/
+      - gameLogic.js (logique du jeu)
+  - App.js (point d'entrée)
+
+DERNIÈRE TENTATIVE :
+Tentative d'implémentation du déplacement à deux doigts avec PanResponder, mais le déplacement à un doigt persiste malgré les vérifications dans onPanResponderMove.
+
+PISTES D'AMÉLIORATION :
+1. Revoir la logique de PanResponder depuis le début
+2. Envisager une autre approche pour la détection des gestes
+3. Séparer complètement la logique de déplacement de celle du jeu
+
+Pour continuer le développement, commencer par résoudre le problème de déplacement à deux doigts, puis passer à la génération infinie de la grille. 
