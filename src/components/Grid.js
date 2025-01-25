@@ -1,90 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, StyleSheet, Text, Alert, ScrollView } from 'react-native';
 import Cell from './Cell';
 import { createGrid, revealEmptyCells } from '../utils/gameLogic';
 
 const Grid = () => {
-  const rows = 12;
-  const cols = 12;
-  const mines = 20; // Nombre de mines
+  const totalRows = 20;
+  const totalCols = 20;
+  const mines = 40;
 
-  const [grid, setGrid] = useState([]);
+  const [grid, setGrid] = useState(() => createGrid(totalRows, totalCols, mines));
   const [gameOver, setGameOver] = useState(false);
 
-  useEffect(() => {
-    initializeGame();
-  }, []);
-
-  const initializeGame = () => {
-    setGrid(createGrid(rows, cols, mines));
-    setGameOver(false);
-  };
-
-  const handlePress = (row, col) => {
+  const handlePress = useCallback((row, col) => {
     if (gameOver || grid[row][col].isFlagged) return;
 
     if (grid[row][col].isMine) {
-      // Perdu !
-      const newGrid = grid.map(row => row.map(cell => ({
+      setGrid(prev => prev.map(row => row.map(cell => ({
         ...cell,
         isRevealed: true
-      })));
-      setGrid(newGrid);
+      }))));
       setGameOver(true);
       Alert.alert('Game Over', 'Vous avez touché une mine !', [
-        {text: 'Rejouer', onPress: initializeGame}
+        {text: 'Rejouer', onPress: () => {
+          setGrid(createGrid(totalRows, totalCols, mines));
+          setGameOver(false);
+        }}
       ]);
       return;
     }
 
-    let newGrid = [...grid];
-    newGrid = revealEmptyCells(newGrid, row, col);
-    setGrid(newGrid);
-  };
+    setGrid(prev => revealEmptyCells([...prev], row, col));
+  }, [gameOver]);
 
-  const handleLongPress = (row, col) => {
+  const handleLongPress = useCallback((row, col) => {
     if (gameOver || grid[row][col].isRevealed) return;
 
-    const newGrid = [...grid];
-    newGrid[row][col] = {
-      ...newGrid[row][col],
-      isFlagged: !newGrid[row][col].isFlagged
-    };
-    setGrid(newGrid);
-  };
+    setGrid(prev => {
+      const newGrid = [...prev];
+      newGrid[row] = [...newGrid[row]];
+      newGrid[row][col] = {
+        ...newGrid[row][col],
+        isFlagged: !newGrid[row][col].isFlagged
+      };
+      return newGrid;
+    });
+  }, [gameOver]);
+
+  const gridContent = useMemo(() => (
+    grid.map((row, rowIndex) => (
+      <View key={rowIndex} style={styles.row}>
+        {row.map((cell, colIndex) => (
+          <Cell
+            key={`${rowIndex}-${colIndex}`}
+            value={cell}
+            onPress={() => handlePress(rowIndex, colIndex)}
+            onLongPress={() => handleLongPress(rowIndex, colIndex)}
+          />
+        ))}
+      </View>
+    ))
+  ), [grid, handlePress, handleLongPress]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Démineur Infini</Text>
-      {grid.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.row}>
-          {row.map((cell, colIndex) => (
-            <Cell
-              key={`${rowIndex}-${colIndex}`}
-              value={cell}
-              onPress={() => handlePress(rowIndex, colIndex)}
-              onLongPress={() => handleLongPress(rowIndex, colIndex)}
-            />
-          ))}
-        </View>
-      ))}
+      <ScrollView style={styles.scrollContainer} horizontal>
+        <ScrollView>
+          <View style={styles.gridContainer}>
+            {gridContent}
+          </View>
+        </ScrollView>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  scrollContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  gridContainer: {
+    padding: 10,
   },
   row: {
     flexDirection: 'row',
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
+    marginVertical: 20,
     fontWeight: 'bold',
   },
 });
 
-export default Grid; 
+export default React.memo(Grid); 

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { TouchableOpacity, StyleSheet, Text } from 'react-native';
 
-const Cell = ({ value, onPress, onLongPress }) => {
+const Cell = memo(({ value, onPress, onLongPress }) => {
   const getCellContent = () => {
     if (!value.isRevealed && !value.isFlagged) return '';
     if (value.isFlagged) return '🚩';
@@ -9,22 +9,27 @@ const Cell = ({ value, onPress, onLongPress }) => {
     return value.neighborCount > 0 ? value.neighborCount : '';
   };
 
-  const getCellStyle = () => {
-    if (!value.isRevealed) return styles.cell;
-    if (value.isMine) return [styles.cell, styles.mineCell];
-    return [styles.cell, styles.revealedCell];
-  };
+  const cellStyle = [
+    styles.cell,
+    value.isRevealed && (value.isMine ? styles.mineCell : styles.revealedCell)
+  ];
 
   return (
     <TouchableOpacity
-      style={getCellStyle()}
+      style={cellStyle}
       onPress={onPress}
       onLongPress={onLongPress}
     >
       <Text style={styles.cellText}>{getCellContent()}</Text>
     </TouchableOpacity>
   );
-};
+}, (prevProps, nextProps) => {
+  // Optimisation du re-rendu
+  return (
+    prevProps.value.isRevealed === nextProps.value.isRevealed &&
+    prevProps.value.isFlagged === nextProps.value.isFlagged
+  );
+});
 
 const styles = StyleSheet.create({
   cell: {

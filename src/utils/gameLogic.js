@@ -1,3 +1,5 @@
+const CHUNK_SIZE = 10; // Taille d'un chunk
+
 // Fonction pour créer une grille avec des mines
 export const createGrid = (rows, cols, mines) => {
   // Initialiser une grille vide
@@ -68,4 +70,34 @@ export const revealEmptyCells = (grid, row, col) => {
     }
   }
   return grid;
-}; 
+};
+
+export const createChunk = (chunkX, chunkY, mineChance = 0.15) => {
+  const chunk = Array(CHUNK_SIZE).fill().map(() => 
+    Array(CHUNK_SIZE).fill().map(() => ({
+      isMine: Math.random() < mineChance,
+      isRevealed: false,
+      isFlagged: false,
+      neighborCount: 0
+    }))
+  );
+
+  // Calculer les nombres pour chaque cellule
+  for (let row = 0; row < CHUNK_SIZE; row++) {
+    for (let col = 0; col < CHUNK_SIZE; col++) {
+      if (!chunk[row][col].isMine) {
+        chunk[row][col].neighborCount = countNeighborMines(chunk, row, col);
+      }
+    }
+  }
+
+  return chunk;
+};
+
+// Convertir les coordonnées globales en coordonnées de chunk
+export const getChunkCoords = (row, col) => ({
+  chunkX: Math.floor(row / CHUNK_SIZE),
+  chunkY: Math.floor(col / CHUNK_SIZE),
+  localRow: row % CHUNK_SIZE,
+  localCol: col % CHUNK_SIZE
+}); 
